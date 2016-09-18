@@ -1,0 +1,28 @@
+{
+  "name": "just-this-once",
+  "version": "1.0.0",
+  "description": "A HOTP and TOTP implementation that can be used for Two-Factor Auth.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BYossarian/just-this-once.git"
+  },
+  "author": "Ben Jackson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/BYossarian/just-this-once/issues"
+  },
+  "homepage": "https://github.com/BYossarian/just-this-once",
+  "dependencies": {
+    "base-desires": "git://github.com/BYossarian/base-desires.git"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "gulp": "^3.9.1",
+    "gulp-eslint": "^3.0.1",
+    "mocha": "^3.0.2"
+  }
+}
