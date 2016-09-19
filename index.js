@@ -10,8 +10,8 @@ const DEFAULTS = {
     encoding: 'base32'
 };
 // according to the spec HOTP uses SHA1, whilst TOTP can also use 
-// SHA256 and SHA512. this implementation is gonna bend the spec a 
-// little and also allow SHA256 and SHA512 for HOTP.
+// SHA256 and SHA512. The HOTP restriction that it use SHA1 is 
+// enforced in generateHOTP.
 const ALLOWED_HASH_FUNCTIONS = new Set([ 'sha1', 'sha256', 'sha512' ]);
 
 const crypto = require('crypto');
