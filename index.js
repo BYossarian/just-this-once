@@ -93,7 +93,7 @@ function _decodeSecret(secret, encoding) {
         throw new Error('secret should be a string, or a Buffer object.');
     }
 
-    const buffer = null;
+    let buffer = null;
 
     if (encoding === 'base32') {
         buffer = baseDesires.base32ToBuffer(secret);

@@ -64,6 +64,19 @@ const TOTP_TEST_DATA = {
         { TIME_IN_SECS: 20000000000, CODE: '478fewerwf32qf63826', HASH_FUNCTION: 'sha512' }
     ]
 };
+// my test data:
+const ENCODINGS_TEST_DATA = {
+    SECRETS: {
+        buffer: Buffer.from('3132333435363738393031323334353637383930', 'hex'),
+        hex: '3132333435363738393031323334353637383930',
+        ascii: '12345678901234567890',
+        base32: 'gezdgnbvgy3tqojqgezdgnbvgy3tqojq',
+        base64: 'MTIzNDU2Nzg5MDEyMzQ1Njc4OTA='
+    },
+    COUNTER: 1,
+    TIME_IN_SECS: 59,
+    CODE: '287082'
+};
 
 describe('generateHOTP', function() {
 
@@ -72,6 +85,18 @@ describe('generateHOTP', function() {
         HOTP_TEST_DATA.CODES.forEach((code, i) => {
 
             expect(generateHOTP(HOTP_TEST_DATA.SECRET, i)).to.equal(code);
+
+        });
+
+    });
+
+    it('accepts the secret in various encodings', function() {
+
+        Object.keys(ENCODINGS_TEST_DATA.SECRETS).forEach((encoding) => {
+
+            const secret = ENCODINGS_TEST_DATA.SECRETS[encoding];
+
+            expect(generateHOTP(secret, ENCODINGS_TEST_DATA.COUNTER, { encoding: encoding })).to.equal(ENCODINGS_TEST_DATA.CODE);
 
         });
 
@@ -94,6 +119,18 @@ describe('generateTOTP', function() {
 
     });
 
+    it('accepts the secret in various encodings', function() {
+
+        Object.keys(ENCODINGS_TEST_DATA.SECRETS).forEach((encoding) => {
+
+            const secret = ENCODINGS_TEST_DATA.SECRETS[encoding];
+
+            expect(generateTOTP(secret, ENCODINGS_TEST_DATA.TIME_IN_SECS * 1000, { encoding: encoding })).to.equal(ENCODINGS_TEST_DATA.CODE);
+
+        });
+
+    });
+
 });
 
 describe('verifyHOTP', function() {
@@ -109,6 +146,18 @@ describe('verifyHOTP', function() {
         HOTP_TEST_DATA.INCORRECT_CODES.forEach((incorrectCode, i) => {
 
             expect(verifyHOTP(incorrectCode, HOTP_TEST_DATA.SECRET, i)).to.equal(false);
+
+        });
+
+    });
+
+    it('accepts the secret in various encodings', function() {
+
+        Object.keys(ENCODINGS_TEST_DATA.SECRETS).forEach((encoding) => {
+
+            const secret = ENCODINGS_TEST_DATA.SECRETS[encoding];
+
+            expect(verifyHOTP(ENCODINGS_TEST_DATA.CODE, secret, ENCODINGS_TEST_DATA.COUNTER, { encoding: encoding })).to.equal(true);
 
         });
 
@@ -135,6 +184,18 @@ describe('verifyTOTP', function() {
                 hashFunction: incorrectData.HASH_FUNCTION,
                 codeLength: TOTP_TEST_DATA.CODE_LENGTH
             })).to.equal(false);
+
+        });
+
+    });
+
+    it('accepts the secret in various encodings', function() {
+
+        Object.keys(ENCODINGS_TEST_DATA.SECRETS).forEach((encoding) => {
+
+            const secret = ENCODINGS_TEST_DATA.SECRETS[encoding];
+
+            expect(verifyTOTP(ENCODINGS_TEST_DATA.CODE, secret, ENCODINGS_TEST_DATA.TIME_IN_SECS * 1000, { encoding: encoding })).to.equal(true);
 
         });
 
