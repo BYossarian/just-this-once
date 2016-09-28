@@ -112,7 +112,7 @@ function generateHOTP(secret, counter, options) {
 
     options = options || {};
 
-    const secretBuffer = _decodeSecret(secret, options.encoding);
+    const secretBuffer = _decodeSecret(secret, options.encoding || DEFAULTS.encoding);
 
     // per the spec HOTP codes have to use HMAC-SHA1:
     return _generateOTP(secretBuffer, counter, 'sha1', options.codeLength || DEFAULTS.codeLength);
@@ -124,7 +124,7 @@ function generateTOTP(secret, time, options) {
 
     options = options || {};
 
-    const secretBuffer = _decodeSecret(secret, options.encoding);
+    const secretBuffer = _decodeSecret(secret, options.encoding || DEFAULTS.encoding);
     const timeCounter = Math.floor((time - (options.startTime || DEFAULTS.startTime)) / (options.timeStep || DEFAULTS.timeStep));
 
     return _generateOTP(secretBuffer, timeCounter, options.hashFunction || DEFAULTS.hashFunction, options.codeLength || DEFAULTS.codeLength);
@@ -149,7 +149,7 @@ function verifyTOTP(candidate, secret, time, options) {
 
     options = options || {};
 
-    const secretBuffer = _decodeSecret(secret, options.encoding);
+    const secretBuffer = _decodeSecret(secret, options.encoding || DEFAULTS.encoding);
     const timeCounter = Math.floor((time - (options.startTime || DEFAULTS.startTime)) / (options.timeStep || DEFAULTS.timeStep));
     const hashFunction = options.hashFunction || DEFAULTS.hashFunction;
     const codeLength = options.codeLength || DEFAULTS.codeLength;
