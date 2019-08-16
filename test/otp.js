@@ -1,14 +1,6 @@
 
 'use strict';
 
-const expect = require('chai').expect;
-
-const justThisOnce = require('../index.js');
-const generateHOTP = justThisOnce.generateHOTP;
-const generateTOTP = justThisOnce.generateTOTP;
-const verifyHOTP = justThisOnce.verifyHOTP;
-const verifyTOTP = justThisOnce.verifyTOTP;
-
 // test data taken from https://tools.ietf.org/html/rfc4226#appendix-D
 const HOTP_TEST_DATA = {
     SECRET: Buffer.from('3132333435363738393031323334353637383930', 'hex'),
@@ -64,7 +56,7 @@ const TOTP_TEST_DATA = {
         { TIME_IN_SECS: 20000000000, CODE: '478fewerwf32qf63826', HASH_FUNCTION: 'sha512' }
     ]
 };
-// my test data:
+// additional test data:
 const ENCODINGS_TEST_DATA = {
     SECRETS: {
         buffer: Buffer.from('3132333435363738393031323334353637383930', 'hex'),
@@ -77,6 +69,11 @@ const ENCODINGS_TEST_DATA = {
     TIME_IN_SECS: 59,
     CODE: '287082'
 };
+
+const expect = require('chai').expect;
+
+const { generateHOTP, generateTOTP, verifyHOTP, verifyTOTP } = require('../index.js');
+
 
 describe('generateHOTP', function() {
 

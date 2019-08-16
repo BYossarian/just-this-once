@@ -16,7 +16,7 @@ const ALLOWED_HASH_FUNCTIONS = new Set([ 'sha1', 'sha256', 'sha512' ]);
 
 const crypto = require('crypto');
 
-const baseDesires = require('base-desires');
+const { base32ToBuffer } = require('./lib/base_32.js');
 
 function _calcDigestBuffer(secret, counter, hashFunction) {
 
@@ -96,9 +96,11 @@ function _decodeSecret(secret, encoding) {
     let buffer = null;
 
     if (encoding === 'base32') {
-        buffer = baseDesires.base32ToBuffer(secret);
+        buffer = base32ToBuffer(secret);
     } else if (encoding === 'urlsafe-base64') {
-        buffer = baseDesires.urlSafeBase64ToBuffer(secret);
+        // make required replacements:
+        string = string.replace(MINUS_REGEX, '+').replace(UNDERSCORE_REGEX, '/');
+        buffer = Buffer.from(string, 'base64');
     } else {
         buffer = Buffer.from(secret, encoding || 'ascii');
     }
