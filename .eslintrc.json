@@ -20,11 +20,7 @@
             "error",
             "always"
         ],
-        "no-console": "off",
-        "semi": [
-            "error",
-            "always"
-        ],
+        "no-console": "warn",
         "new-cap": "off",
         "strict": [
             "error",
@@ -40,10 +36,6 @@
             }
         ],
         "eol-last": "off",
-        "quotes": [
-            "error",
-            "single"
-        ],
         "comma-dangle": "warn"
     }
 }
