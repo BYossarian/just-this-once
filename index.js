@@ -98,9 +98,9 @@ function _decodeSecret(secret, encoding) {
     if (encoding === 'base32') {
         buffer = base32ToBuffer(secret);
     } else if (encoding === 'urlsafe-base64') {
-        // make required replacements:
-        string = string.replace(MINUS_REGEX, '+').replace(UNDERSCORE_REGEX, '/');
-        buffer = Buffer.from(string, 'base64');
+        // convert urlsafe-base64 string to base64 string, and then get Buffer:
+        secret = secret.replace(/-/g, '+').replace(/_/g, '/');
+        buffer = Buffer.from(secret, 'base64');
     } else {
         buffer = Buffer.from(secret, encoding || 'ascii');
     }

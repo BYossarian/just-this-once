@@ -1,4 +1,6 @@
 
+/* eslint-env mocha */
+
 'use strict';
 
 // test data taken from https://tools.ietf.org/html/rfc4226#appendix-D

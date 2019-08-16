@@ -1,4 +1,6 @@
 
+/* eslint-env mocha */
+
 'use strict';
 
 // test data:

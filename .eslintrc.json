@@ -1,0 +1,49 @@
+{
+    "env": {
+        "es6": true,
+        "node": true
+    },
+    "extends": "eslint:recommended",
+    "parserOptions": {
+        "ecmaVersion": 2015
+    },
+    "rules": {
+        "linebreak-style": [
+            "error",
+            "unix"
+        ],
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "semi": [
+            "error",
+            "always"
+        ],
+        "no-console": "off",
+        "semi": [
+            "error",
+            "always"
+        ],
+        "new-cap": "off",
+        "strict": [
+            "error",
+            "global"
+        ],
+        "no-underscore-dangle": "off",
+        "no-use-before-define": "error",
+        "no-unused-vars": [
+            "error",
+            {
+                "vars": "all",
+                "args": "none"
+            }
+        ],
+        "eol-last": "off",
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "comma-dangle": "warn"
+    }
+}
