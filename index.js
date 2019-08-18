@@ -24,7 +24,7 @@ function _calcDigestBuffer(secret, counter, hashFunction) {
     // with 0s (this shouldn't ever truncate counterInt/counterHexString since any 
     // values that would get truncated have already been rejected by Number.isSafeInteger() 
     // in _generateOTP) to get an 8-byte Buffer:
-    const counterHexString = ('0000000000000000' + counter.toString(16)).substr(-16);
+    const counterHexString = ('0000000000000000' + counter.toString(16)).slice(-16);
 
     return crypto.createHmac(hashFunction, secret)
                     .update(Buffer.from(counterHexString, 'hex'))
