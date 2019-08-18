@@ -74,7 +74,7 @@ const ENCODINGS_TEST_DATA = {
 
 const expect = require('chai').expect;
 
-const { generateHOTP, generateTOTP, verifyHOTP, verifyTOTP } = require('../index.js');
+const { generateHOTP, generateTOTP, verifyHOTP, verifyTOTP, generateSecret } = require('../index.js');
 
 
 describe('generateHOTP', function() {
@@ -197,6 +197,32 @@ describe('verifyTOTP', function() {
             expect(verifyTOTP(ENCODINGS_TEST_DATA.CODE, secret, ENCODINGS_TEST_DATA.TIME_IN_SECS * 1000, { encoding: encoding })).to.equal(true);
 
         });
+
+    });
+
+});
+
+describe('generateSecret', function() {
+
+    it('generates base32 encoded random strings by default', async function() {
+
+        const [ secretWith32Bytes, secretWith64Bytes, secretWith128Bytes ] 
+                    = await Promise.all([32, 64, 128].map((numBytes) => { return generateSecret(numBytes); }));
+
+        expect(secretWith32Bytes).to.match(/^[a-z2-7]{52}={4}$/);
+        expect(secretWith64Bytes).to.match(/^[a-z2-7]{103}={1}$/);
+        expect(secretWith128Bytes).to.match(/^[a-z2-7]{205}={3}$/);
+
+    });
+
+    it('can generate secrets in hex, base64, and urlsafe-base64', async function() {
+
+        const [ hexSecret, base64Secret, urlsafeBase64Secret ] 
+                    = await Promise.all(['hex', 'base64', 'urlsafe-base64'].map((encoding) => { return generateSecret(64, encoding); }));
+
+        expect(hexSecret).to.match(/^[0-9a-f]{128}$/);
+        expect(base64Secret).to.match(/^[a-z0-9+/]{86}={2}$/);
+        expect(urlsafeBase64Secret).to.match(/^[a-z0-9\-_]{86}={2}$/);
 
     });
 

@@ -16,7 +16,7 @@ const ALLOWED_HASH_FUNCTIONS = new Set([ 'sha1', 'sha256', 'sha512' ]);
 
 const crypto = require('crypto');
 
-const { base32ToBuffer } = require('./lib/base_32.js');
+const { bufferToBase32, base32ToBuffer } = require('./lib/base_32.js');
 
 function _calcDigestBuffer(secret, counter, hashFunction) {
 
@@ -169,9 +169,33 @@ function verifyTOTP(candidate, secret, time, options) {
 
 }
 
+function generateSecret(numBytes, encoding = 'base32') {
+
+    return new Promise((resolve, reject) => {
+
+        crypto.randomBytes(numBytes, (err, buffer) => {
+            
+            if (err) { return reject(err); }
+        
+            if (encoding === 'base32') {
+                resolve(bufferToBase32(buffer));
+            } else if (encoding === 'urlsafe-base64') {
+                const base64String = buffer.toString('base64').toLowerCase();
+                resolve(base64String.replace(/\+/g, '-').replace(/\//g, '_'));
+            } else {
+                resolve(buffer.toString(encoding).toLowerCase());
+            }
+
+        });
+
+    });
+
+}
+
 module.exports = {
-    generateHOTP: generateHOTP,
-    generateTOTP: generateTOTP,
-    verifyHOTP: verifyHOTP,
-    verifyTOTP: verifyTOTP
+    generateHOTP,
+    generateTOTP,
+    verifyHOTP,
+    verifyTOTP,
+    generateSecret
 };
