@@ -61,15 +61,15 @@ const TOTP_TEST_DATA = {
 // additional test data:
 const ENCODINGS_TEST_DATA = {
     SECRETS: {
-        buffer: Buffer.from('3132333435363738393031323334353637383930', 'hex'),
-        hex: '3132333435363738393031323334353637383930',
-        ascii: '12345678901234567890',
-        base32: 'gezdgnbvgy3tqojqgezdgnbvgy3tqojq',
-        base64: 'MTIzNDU2Nzg5MDEyMzQ1Njc4OTA='
+        buffer: Buffer.from('31323334353637f83930313233e4353637383930', 'hex'),
+        hex: '31323334353637f83930313233e4353637383930',
+        base32: 'gezdgnbvgy37qojqgezdhzbvgy3tqojq',
+        base64: 'MTIzNDU2N/g5MDEyM+Q1Njc4OTA=',
+        'urlsafe-base64': 'MTIzNDU2N_g5MDEyM-Q1Njc4OTA='
     },
     COUNTER: 1,
     TIME_IN_SECS: 59,
-    CODE: '287082'
+    CODE: '358636'
 };
 
 const expect = require('chai').expect;
