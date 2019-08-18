@@ -34,17 +34,16 @@ function _calcDigestBuffer(secret, counter, hashFunction) {
 
 function _generateOTP(secret, counter, hashFunction, codeLength) {
 
-    // since this is being used for security, we want to be strict 
-    // about what we accept so as to avoid unintended consequences 
-    // and/or attack vectors, so let's validate everything strictly:
-    if (!Buffer.isBuffer(secret)) {
-        throw new Error('secret should be a Buffer.');
+    if (!Buffer.isBuffer(secret) || !secret.length) {
+        throw new Error('secret should be a non-empty Buffer.');
     }
 
-    // spec requires a secret of at least 128 bits:
-    if (secret.length < 16) {
-        throw new Error('secret should be at least 128 bits.');
-    }
+    // NB: there are a lot of implementations in the wild that don't respect 
+    // this so gonna disable for now:
+    // // spec requires a secret of at least 128 bits:
+    // if (secret.length < 16) {
+    //     throw new Error('secret should be at least 128 bits.');
+    // }
 
     // isSafeInteger checks that the value is a Number, has an integer 
     // value, and is between Number.MIN_SAFE_INTEGER and Number.MAX_SAFE_INTEGER
