@@ -3,7 +3,4 @@ A HOTP and TOTP implementation that can be used for Two-Factor Auth.
 
 Uses the Node v8+.
 
-// TODO: code review
-    // TODO: loosen at least 128 bit secrets restriction as most implementations don't seem to bother with it?
-    // TODO: substr -> substring
-// TODO: document
+// TODO: document - note differences from spec

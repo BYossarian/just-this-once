@@ -47,9 +47,8 @@ function _generateOTP(secret, counter, hashFunction, codeLength) {
 
     // isSafeInteger checks that the value is a Number, has an integer 
     // value, and is between Number.MIN_SAFE_INTEGER and Number.MAX_SAFE_INTEGER
-    // NB: this means we don't fully conform to the HOTP spec, since that requires 
-    // us to be able to handle 8-bytes ints for the counter, which is larger than 
-    // Number.MAX_SAFE_INTEGER.
+    // NB: this means we don't fully conform to the spec, since that requires us 
+    // to be able to handle 64-bit ints for the counter:
     if (!Number.isSafeInteger(counter) || counter < 0) {
         throw new Error('counter should be a safe, positive integer.');
     }
