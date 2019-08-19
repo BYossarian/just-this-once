@@ -13,26 +13,14 @@ const DEFAULTS = {
 // SHA256 and SHA512. The HOTP restriction that it use SHA1 is 
 // enforced in generateHOTP.
 const ALLOWED_HASH_FUNCTIONS = new Set([ 'sha1', 'sha256', 'sha512' ]);
+const ACCEPTED_ENCODINGS = new Set([ 'base32', 'urlsafe-base64', 'base64', 'hex' ]);
 
 const crypto = require('crypto');
 
 const { bufferToBase32, base32ToBuffer } = require('./lib/base_32.js');
 
-function _calcDigestBuffer(secret, counter, hashFunction) {
 
-    // HOTP/TOTP uses an 8 byte (= 16 hex chars) int for it's counter so need to pad 
-    // with 0s (this shouldn't ever truncate counterInt/counterHexString since any 
-    // values that would get truncated have already been rejected by Number.isSafeInteger() 
-    // in _generateOTP) to get an 8-byte Buffer:
-    const counterHexString = ('0000000000000000' + counter.toString(16)).slice(-16);
-
-    return crypto.createHmac(hashFunction, secret)
-                    .update(Buffer.from(counterHexString, 'hex'))
-                    .digest();
-
-}
-
-function _generateOTP(secret, counter, hashFunction, codeLength) {
+function _generateOTP(secret, counter, hashFunction = DEFAULTS.hashFunction, codeLength = DEFAULTS.codeLength) {
 
     if (!Buffer.isBuffer(secret) || !secret.length) {
         throw new Error('secret should be a non-empty Buffer.');
@@ -63,15 +51,21 @@ function _generateOTP(secret, counter, hashFunction, codeLength) {
     }
 
     // so we calculate a HMAC-SHA1 digest using the counter 
-    // and secret, and take the last 4 bits as an offset. We then 
-    // truncate the digest to 4 bytes starting at offset:
-    const digestBuffer = _calcDigestBuffer(secret, counter, hashFunction);
+    // and secret:
+    // (NB: HOTP/TOTP uses an 8 byte (= 16 hex chars) int for it's counter so need to pad 
+    // with 0s (this shouldn't ever truncate counterInt/counterHexString since any 
+    // values that would get truncated have already been rejected by Number.isSafeInteger() 
+    // in _generateOTP) to get an 8-byte Buffer.)
+    const counterHexString = ('0000000000000000' + counter.toString(16)).slice(-16);
+    const digestBuffer = crypto.createHmac(hashFunction, secret)
+                            .update(Buffer.from(counterHexString, 'hex'))
+                            .digest();
+    // we then take the last 4 bits as an offset:
     const offset = digestBuffer[digestBuffer.length - 1] & 0xf;
+    // and truncate the digest to 4 bytes starting at offset:
     let truncatedDigest = digestBuffer.readUIntBE(offset, 4);
-
     // next, we set most signifcant bit to zero:
     truncatedDigest = truncatedDigest & 0x7fffffff;
-
     // then, convert to required number of digits using modulo, and 
     // cast to a string:
     truncatedDigest = (truncatedDigest % Math.pow(10, codeLength)).toString();
@@ -81,7 +75,7 @@ function _generateOTP(secret, counter, hashFunction, codeLength) {
 
 }
 
-function _decodeSecret(secret, encoding) {
+function _decodeSecret(secret, encoding = DEFAULTS.encoding) {
 
     if (Buffer.isBuffer(secret)) {
         return secret;
@@ -89,6 +83,10 @@ function _decodeSecret(secret, encoding) {
 
     if (!secret || typeof secret !== 'string') {
         throw new Error('secret should be a string, or a Buffer object.');
+    }
+
+    if (!ACCEPTED_ENCODINGS.has(encoding)) {
+        throw new Error('unrecognised encoding for HOTP/TOTP secret.');
     }
 
     let buffer = null;
@@ -100,7 +98,7 @@ function _decodeSecret(secret, encoding) {
         secret = secret.replace(/-/g, '+').replace(/_/g, '/');
         buffer = Buffer.from(secret, 'base64');
     } else {
-        buffer = Buffer.from(secret, encoding || 'ascii');
+        buffer = Buffer.from(secret, encoding);
     }
 
     return buffer;
@@ -167,7 +165,7 @@ function verifyTOTP(candidate, secret, time, options) {
 
 }
 
-function generateSecret(numBytes, encoding = 'base32') {
+function generateSecret(numBytes, encoding = DEFAULTS.encoding) {
 
     return new Promise((resolve, reject) => {
 
