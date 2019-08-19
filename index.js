@@ -3,11 +3,11 @@
 
 // DEFAULTS are based on Google Authenticator
 const DEFAULTS = {
+    encoding: 'base32',
     codeLength: 6,
     hashFunction: 'sha1',
     startTime: 0,
-    timeStep: 30000,
-    encoding: 'base32'
+    timeStep: 30000
 };
 // according to the spec HOTP uses SHA1, whilst TOTP can also use 
 // SHA256 and SHA512. The HOTP restriction that it use SHA1 is 
@@ -117,6 +117,16 @@ function generateHOTP(secret, counter, options) {
 
 }
 
+function verifyHOTP(candidate, secret, counter, options) {
+
+    if (!candidate) {
+        return false;
+    }
+
+    return candidate === generateHOTP(secret, counter, options);
+
+}
+
 // https://tools.ietf.org/html/rfc6238#section-4
 function generateTOTP(secret, time, options) {
 
@@ -126,16 +136,6 @@ function generateTOTP(secret, time, options) {
     const timeCounter = Math.floor((time - startTime) / timeStep);
 
     return _generateOTP(secretBuffer, timeCounter, hashFunction, codeLength);
-
-}
-
-function verifyHOTP(candidate, secret, counter, options) {
-
-    if (!candidate) {
-        return false;
-    }
-
-    return candidate === generateHOTP(secret, counter, options);
 
 }
 
@@ -188,8 +188,8 @@ function generateSecret(numBytes, encoding = DEFAULTS.encoding) {
 
 module.exports = {
     generateHOTP,
-    generateTOTP,
     verifyHOTP,
+    generateTOTP,
     verifyTOTP,
     generateSecret
 };

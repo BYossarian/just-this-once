@@ -26,6 +26,7 @@ sendSecretToClient(secret);
 saveSecretToDB(secret);
 ```
 
+The client can then put this secret into a TOTP passcode generator like Google Authenticator in order to generate passcodes whenever requested.
 Then, at some later point when the client logs in, we need to verify the passcode they send:
 ```
 const secret = getFromDB();
@@ -40,8 +41,54 @@ If `isPasscodeValid` is `false` then the login/request should be rejected. And t
 
 Just-this-once exposes 5 functions: `generateHOTP`, `verifyHOTP`, `generateTOTP`, `verifyTOTP`, and `generateSecret`.
 
+### Options
+
+`generateHOTP`, `verifyHOTP`, `generateTOTP`, and `verifyTOTP` all accept an optional `options` object as described below. All fields in the options object are optional; and the defaults match those used by most popular implementations including Google Authenticator.
+
+```
+{
+    encoding: <string - one of 'base32', 'urlsafe-base64', 'base64', 'hex'; default: 'base32'>,
+    codeLength: <positive integer; default: 6>,
+    // these are only used for TOTP:
+    hashFunction: <string - one of 'sha1', 'sha256', 'sha512'; default: 'sha1'>,
+    startTime: <positive integer; default: 0>,
+    timeStep: <positive integer; default: 30000>
+}
+```
+
+`encoding` - this is the encoding used to encode the secret into a string
+
+`codeLength` - this is the length of the passcode
+
+`hashFunction` - this is the hash function used in the process of generating the passcodes
+
+`startTime` - this is the start time in milliseconds used in TOTP in order to calculate the time-based counter
+
+`timeStep` - this is the time-step in milliseconds used in TOTP in order to calculate the time-based counter
+
+### generateHOTP(secret, counter, options)
+
+// TODO
+
+### verifyHOTP(candidate, secret, counter, options)
+
+// TODO
+
+### generateTOTP(secret, time, options)
+
+// TODO
+
+### verifyTOTP(candidate, secret, time, options)
+
+// TODO
+
+### generateSecret(numBytes, encoding)
+
+// TODO
+
 ## TODO
 
 - Use ArrayBuffer in place of Buffer so that this can be used outside of Node. For crypto functions:
 https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest
 https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
+- Allow specification of 'time-step leeway' in verifyTOTP. Maybe just a boolean for strict/non-strict (non-strict === +1/-1 timestep)
