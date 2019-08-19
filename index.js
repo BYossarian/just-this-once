@@ -108,24 +108,24 @@ function _decodeSecret(secret, encoding = DEFAULTS.encoding) {
 // https://tools.ietf.org/html/rfc4226#section-5
 function generateHOTP(secret, counter, options) {
 
-    options = options || {};
+    const { encoding, codeLength } = { ...DEFAULTS, ...options };
 
-    const secretBuffer = _decodeSecret(secret, options.encoding || DEFAULTS.encoding);
+    const secretBuffer = _decodeSecret(secret, encoding);
 
     // per the spec HOTP codes have to use HMAC-SHA1:
-    return _generateOTP(secretBuffer, counter, 'sha1', options.codeLength || DEFAULTS.codeLength);
+    return _generateOTP(secretBuffer, counter, 'sha1', codeLength);
 
 }
 
 // https://tools.ietf.org/html/rfc6238#section-4
 function generateTOTP(secret, time, options) {
 
-    options = options || {};
+    const { encoding, startTime, timeStep, hashFunction, codeLength } = { ...DEFAULTS, ...options };
 
-    const secretBuffer = _decodeSecret(secret, options.encoding || DEFAULTS.encoding);
-    const timeCounter = Math.floor((time - (options.startTime || DEFAULTS.startTime)) / (options.timeStep || DEFAULTS.timeStep));
+    const secretBuffer = _decodeSecret(secret, encoding);
+    const timeCounter = Math.floor((time - startTime) / timeStep);
 
-    return _generateOTP(secretBuffer, timeCounter, options.hashFunction || DEFAULTS.hashFunction, options.codeLength || DEFAULTS.codeLength);
+    return _generateOTP(secretBuffer, timeCounter, hashFunction, codeLength);
 
 }
 
@@ -145,12 +145,10 @@ function verifyTOTP(candidate, secret, time, options) {
         return false;
     }
 
-    options = options || {};
+    const { encoding, startTime, timeStep, hashFunction, codeLength } = { ...DEFAULTS, ...options };
 
-    const secretBuffer = _decodeSecret(secret, options.encoding || DEFAULTS.encoding);
-    const timeCounter = Math.floor((time - (options.startTime || DEFAULTS.startTime)) / (options.timeStep || DEFAULTS.timeStep));
-    const hashFunction = options.hashFunction || DEFAULTS.hashFunction;
-    const codeLength = options.codeLength || DEFAULTS.codeLength;
+    const secretBuffer = _decodeSecret(secret, encoding);
+    const timeCounter = Math.floor((time - startTime) / timeStep);
 
     // due to the possibility of the server clock and client clock being out of
     // sync, it's standard to accept codes that are +/- one timeStep (effectively

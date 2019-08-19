@@ -40,8 +40,8 @@ If `isPasscodeValid` is `false` then the login/request should be rejected. And t
 
 Just-this-once exposes 5 functions: `generateHOTP`, `verifyHOTP`, `generateTOTP`, `verifyTOTP`, and `generateSecret`.
 
-### generateHOTP(secret, counter, options);
-
 ## TODO
 
-- Use ArrayBuffer in place of Buffer so that this can be used outside of Node. (Although we also make use of Node's crypto lib?)
+- Use ArrayBuffer in place of Buffer so that this can be used outside of Node. For crypto functions:
+https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest
+https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
