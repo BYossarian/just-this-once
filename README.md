@@ -92,3 +92,4 @@ Just-this-once exposes 5 functions: `generateHOTP`, `verifyHOTP`, `generateTOTP`
 https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest
 https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
 - Allow specification of 'time-step leeway' in verifyTOTP. Maybe just a boolean for strict/non-strict (non-strict === +1/-1 timestep)
+- Use TypeScript to do input validation

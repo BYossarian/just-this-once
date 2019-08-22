@@ -94,6 +94,9 @@ function _decodeSecret(secret, encoding = DEFAULTS.encoding) {
     if (encoding === 'base32') {
         buffer = base32ToBuffer(secret);
     } else if (encoding === 'urlsafe-base64') {
+        if (secret.length % 4 !== 0 || !/^[a-z1-9\-_]+(?:=|={2})?$/i.test(secret)) {
+            throw new Error('Invalid urlsafe-base64 string passed in as secret.');
+        }
         // convert urlsafe-base64 string to base64 string, and then get Buffer:
         secret = secret.replace(/-/g, '+').replace(/_/g, '/');
         buffer = Buffer.from(secret, 'base64');
@@ -130,6 +133,13 @@ function verifyHOTP(candidate, secret, counter, options) {
 // https://tools.ietf.org/html/rfc6238#section-4
 function generateTOTP(secret, time, options) {
 
+    // other input parameters will get validated in _decodeSecret or _generateOTP, but 
+    // need to check time here as the timeCounter calculation can cause non-numbers to 
+    // produce a valid number for timeCounter:
+    if (!Number.isSafeInteger(time) || time < 0) {
+        throw new Error('time should be a safe, positive integer.');
+    }
+
     const { encoding, startTime, timeStep, hashFunction, codeLength } = { ...DEFAULTS, ...options };
 
     const secretBuffer = _decodeSecret(secret, encoding);
@@ -143,6 +153,10 @@ function verifyTOTP(candidate, secret, time, options) {
 
     if (!candidate) {
         return false;
+    }
+
+    if (!Number.isSafeInteger(time) || time < 0) {
+        throw new Error('time should be a safe, positive integer.');
     }
 
     const { encoding, startTime, timeStep, hashFunction, codeLength } = { ...DEFAULTS, ...options };

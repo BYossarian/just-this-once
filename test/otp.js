@@ -71,6 +71,13 @@ const ENCODINGS_TEST_DATA = {
     TIME_IN_SECS: 59,
     CODE: '358636'
 };
+const MALFORMED_SECRETS = {
+    hex: 'zqw',
+    base32: '089',
+    base64: '+((',
+    'urlsafe-base64': 'MTIzNDU2N/g5MDEyM+Q1Njc4OTA='  // <- this is base64; not urlsafe-base64
+};
+
 
 const expect = require('chai').expect;
 
@@ -96,6 +103,96 @@ describe('generateHOTP', function() {
             const secret = ENCODINGS_TEST_DATA.SECRETS[encoding];
 
             expect(generateHOTP(secret, ENCODINGS_TEST_DATA.COUNTER, { encoding: encoding })).to.equal(ENCODINGS_TEST_DATA.CODE);
+
+        });
+
+    });
+
+    it('throws when either the secret or the counter is missing', function() {
+
+        expect(generateHOTP.bind(null)).to.throw();
+
+        const secret = ENCODINGS_TEST_DATA.SECRETS.buffer;
+
+        expect(generateHOTP.bind(null, secret)).to.throw();
+
+        // incorrect type for counter
+        expect(generateHOTP.bind(null, secret, '')).to.throw();
+        expect(generateHOTP.bind(null, secret, NaN)).to.throw();
+
+    });
+
+    it('throws when passed malformed secrets', function() {
+
+        Object.keys(MALFORMED_SECRETS).forEach((encoding) => {
+
+            const secret = MALFORMED_SECRETS[encoding];
+
+            expect(generateHOTP.bind(null, secret, 0, { encoding: encoding })).to.throw();
+
+        });
+
+    });
+
+});
+
+describe('verifyHOTP', function() {
+
+    it('verifies candidate HOTP codes', function() {
+
+        HOTP_TEST_DATA.CODES.forEach((code, i) => {
+
+            expect(verifyHOTP(code, HOTP_TEST_DATA.SECRET, i)).to.equal(true);
+
+        });
+
+        HOTP_TEST_DATA.INCORRECT_CODES.forEach((incorrectCode, i) => {
+
+            expect(verifyHOTP(incorrectCode, HOTP_TEST_DATA.SECRET, i)).to.equal(false);
+
+        });
+
+    });
+
+    it('accepts the secret in various encodings', function() {
+
+        Object.keys(ENCODINGS_TEST_DATA.SECRETS).forEach((encoding) => {
+
+            const secret = ENCODINGS_TEST_DATA.SECRETS[encoding];
+
+            expect(verifyHOTP(ENCODINGS_TEST_DATA.CODE, secret, ENCODINGS_TEST_DATA.COUNTER, { encoding: encoding })).to.equal(true);
+
+        });
+
+    });
+
+    it('returns false if no candidate passcode is passed in', function() {
+
+        expect(verifyHOTP()).to.equal(false);
+
+    });
+
+    it('throws when either the secret or the counter is missing', function() {
+
+        expect(verifyHOTP.bind(null, '123456')).to.throw();
+
+        const secret = ENCODINGS_TEST_DATA.SECRETS.buffer;
+
+        expect(verifyHOTP.bind(null, '123456', secret)).to.throw();
+
+        // incorrect type for counter
+        expect(verifyHOTP.bind(null, '123456', secret, '')).to.throw();
+        expect(verifyHOTP.bind(null, '123456', secret, NaN)).to.throw();
+
+    });
+
+    it('throws when passed malformed secrets', function() {
+
+        Object.keys(MALFORMED_SECRETS).forEach((encoding) => {
+
+            const secret = MALFORMED_SECRETS[encoding];
+
+            expect(verifyHOTP.bind(null, '123456', secret, 0, { encoding: encoding })).to.throw();
 
         });
 
@@ -130,33 +227,28 @@ describe('generateTOTP', function() {
 
     });
 
-});
+    it('throws when either the secret or the time parameters are missing', function() {
 
-describe('verifyHOTP', function() {
+        expect(generateTOTP.bind(null)).to.throw();
 
-    it('verifies candidate HOTP codes', function() {
+        const secret = ENCODINGS_TEST_DATA.SECRETS.buffer;
 
-        HOTP_TEST_DATA.CODES.forEach((code, i) => {
+        expect(generateTOTP.bind(null, secret)).to.throw();
 
-            expect(verifyHOTP(code, HOTP_TEST_DATA.SECRET, i)).to.equal(true);
-
-        });
-
-        HOTP_TEST_DATA.INCORRECT_CODES.forEach((incorrectCode, i) => {
-
-            expect(verifyHOTP(incorrectCode, HOTP_TEST_DATA.SECRET, i)).to.equal(false);
-
-        });
+        // incorrect type for time parameter:
+        expect(generateTOTP.bind(null, secret, '')).to.throw();
+        expect(generateTOTP.bind(null, secret, NaN)).to.throw();
+        expect(generateTOTP.bind(null, secret, new Date())).to.throw();
 
     });
 
-    it('accepts the secret in various encodings', function() {
+    it('throws when passed malformed secrets', function() {
 
-        Object.keys(ENCODINGS_TEST_DATA.SECRETS).forEach((encoding) => {
+        Object.keys(MALFORMED_SECRETS).forEach((encoding) => {
 
-            const secret = ENCODINGS_TEST_DATA.SECRETS[encoding];
+            const secret = MALFORMED_SECRETS[encoding];
 
-            expect(verifyHOTP(ENCODINGS_TEST_DATA.CODE, secret, ENCODINGS_TEST_DATA.COUNTER, { encoding: encoding })).to.equal(true);
+            expect(generateTOTP.bind(null, secret, 0, { encoding: encoding })).to.throw();
 
         });
 
@@ -200,6 +292,39 @@ describe('verifyTOTP', function() {
 
     });
 
+    it('returns false if no candidate passcode is passed in', function() {
+
+        expect(verifyTOTP()).to.equal(false);
+
+    });
+
+    it('throws when either the secret or the time parameters are missing', function() {
+
+        expect(verifyTOTP.bind(null, '123456')).to.throw();
+
+        const secret = ENCODINGS_TEST_DATA.SECRETS.buffer;
+
+        expect(verifyTOTP.bind(null, secret)).to.throw();
+
+        // incorrect type for time parameter:
+        expect(verifyTOTP.bind(null, '123456', secret, '')).to.throw();
+        expect(verifyTOTP.bind(null, '123456', secret, NaN)).to.throw();
+        expect(verifyTOTP.bind(null, '123456', secret, new Date())).to.throw();
+
+    });
+
+    it('throws when passed malformed secrets', function() {
+
+        Object.keys(MALFORMED_SECRETS).forEach((encoding) => {
+
+            const secret = MALFORMED_SECRETS[encoding];
+
+            expect(verifyTOTP.bind(null, secret, 0, { encoding: encoding })).to.throw();
+
+        });
+
+    });
+
 });
 
 describe('generateSecret', function() {
@@ -215,7 +340,7 @@ describe('generateSecret', function() {
 
     });
 
-    it('can generate secrets in hex, base64, and urlsafe-base64', async function() {
+    it('can also generate secrets in hex, base64, and urlsafe-base64', async function() {
 
         const [ hexSecret, base64Secret, urlsafeBase64Secret ] 
                     = await Promise.all(['hex', 'base64', 'urlsafe-base64'].map((encoding) => { return generateSecret(64, encoding); }));
