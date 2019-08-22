@@ -181,6 +181,10 @@ function generateSecret(numBytes, encoding = DEFAULTS.encoding) {
 
     return new Promise((resolve, reject) => {
 
+        if (!ACCEPTED_ENCODINGS.has(encoding)) {
+            return reject(new Error('unrecognised encoding used to generate secret.'));
+        }
+
         crypto.randomBytes(numBytes, (err, buffer) => {
             
             if (err) { return reject(err); }

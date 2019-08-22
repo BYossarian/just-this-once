@@ -15,19 +15,25 @@ TOTP Spec: https://tools.ietf.org/html/rfc6238
 
 ## Example
 
-Let's consider using just-this-once on the server.
+Let's consider using just-this-once on the server to allow two-factor auth via a TOTP. The flow is:
 
-First, as part of enabling 2FA for the client, let's generate a secret server-side and share it:
+- A user/client enables 2FA, so the server generates a secret and sends it to the client.
+- The client puts the secret into a client-side TOTP generator such as Google Authenticator.
+- Later on, when the client tries to log in or access some protected resource, the server requests a passcode.
+- The client gets a passcode from their TOTP generator and sends it to the server.
+- The server can then verify the passcode and allow/disallow access to the resource.
+
+Ok, first, as part of enabling 2FA for the client, let's generate a client-specific secret server-side and share it:
 
 ```
-const secret = generateSecret(16);
+const secret = generateSecret(16);  // <- 16 bytes for the secret
 
 sendSecretToClient(secret);
 saveSecretToDB(secret);
 ```
 
-The client can then put this secret into a TOTP passcode generator like Google Authenticator in order to generate passcodes whenever requested.
-Then, at some later point when the client logs in, we need to verify the passcode they send:
+The client puts this secret into their TOTP passcode generator.
+Then, at some later point when the client accesses some protected resource, we need to verify the passcode they send:
 ```
 const secret = getFromDB();
 const candidatePasscode = getFromClientRequest();
@@ -41,9 +47,16 @@ If `isPasscodeValid` is `false` then the login/request should be rejected. And t
 
 Just-this-once exposes 5 functions: `generateHOTP`, `verifyHOTP`, `generateTOTP`, `verifyTOTP`, and `generateSecret`.
 
+### Secrets
+
+`generateHOTP`, `verifyHOTP`, `generateTOTP`, and `verifyTOTP` all require a secret in order to generate/verify passcodes. The secret can be passed in as either a Buffer or an encoded string. The accepted encodings are 'base32', 'urlsafe-base64', 'base64', or 'hex'. The specific encoding used can be specified in the optional options object (see below), and the default is 'base32'.
+
 ### Options
 
-`generateHOTP`, `verifyHOTP`, `generateTOTP`, and `verifyTOTP` all accept an optional `options` object as described below. All fields in the options object are optional; and the defaults match those used by most popular implementations including Google Authenticator.
+`generateHOTP`, `verifyHOTP`, `generateTOTP`, and `verifyTOTP` all accept an optional `options` object. All fields in the options object are optional; and the defaults match those used by most popular implementations including Google Authenticator.
+
+
+NB: All times passed into the TOTP functions should be numbers expressed in milliseconds.
 
 ```
 {
@@ -56,7 +69,7 @@ Just-this-once exposes 5 functions: `generateHOTP`, `verifyHOTP`, `generateTOTP`
 }
 ```
 
-`encoding` - this is the encoding used to encode the secret into a string
+`encoding` - this is the encoding used to decode the secret (if passing the secret as a Buffer, this will be ignored)
 
 `codeLength` - this is the length of the passcode
 
@@ -67,24 +80,29 @@ Just-this-once exposes 5 functions: `generateHOTP`, `verifyHOTP`, `generateTOTP`
 `timeStep` - this is the time-step in milliseconds used in TOTP in order to calculate the time-based counter
 
 ### generateHOTP(secret, counter, options)
-
-// TODO
-
 ### verifyHOTP(candidate, secret, counter, options)
 
-// TODO
+Used to generate/verify a HOTP passcode.
+
+`secret`, `options` - See above
+`counter` - A non-negative integer used to generate the passcode. It should be incremented on each request.
+`candidate` - A string containing the candidate passcode to be verified.
 
 ### generateTOTP(secret, time, options)
-
-// TODO
-
 ### verifyTOTP(candidate, secret, time, options)
 
-// TODO
+Used to generate/verify a TOTP passcode.
+
+`secret`, `options` - See above
+`time` - The current time, expressed in milliseconds. (i.e. Unix time, except milliseconds are used rather than seconds)
+`candidate` - A string containing the candidate passcode to be verified.
 
 ### generateSecret(numBytes, encoding)
 
-// TODO
+Used to generate a cryptographically strong pseudo-random secret. Returns an encoded string.
+
+`numBytes` - the number of bytes used to generate the secret
+`encoding` - this is the encoding used to encode the secret. Can be one of 'base32', 'urlsafe-base64', 'base64', or 'hex'.
 
 ## TODO
 
