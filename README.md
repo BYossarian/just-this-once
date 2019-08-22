@@ -6,7 +6,9 @@ Uses/requires Node v8+.
 ## HOTP/TOTP 101
 
 HOTP and TOTP are protocols used for generating and verifying one-time passwords. They are often used for 2FA (e.g. Google Authenticator). In both cases, a secret is shared between the server and the client. This secret is then used to generate a passcode client-side which can be independently verified by the server.
+
 HOTP makes use of the secret together with a counter in order to generate the passcode. The counter should be incremented every time that a passcode is generated/verified, and thus prevents replay attacks. However, this leads to issues around keeping the server's counter synced with the client's counter.
+
 TOTP improves on HOTP by replacing the counter with the current time - or, more precisely, the number of time-steps that have passed since some start time - in order to avoid having to keep the counter synced between client and server.
 
 HOTP Spec: https://tools.ietf.org/html/rfc4226
@@ -23,7 +25,7 @@ Let's consider using just-this-once on the server to allow two-factor auth via a
 - The client gets a passcode from their TOTP generator and sends it to the server.
 - The server can then verify the passcode and allow/disallow access to the resource.
 
-Ok, first, as part of enabling 2FA for the client, let's generate a client-specific secret server-side and share it:
+Ok, to enable 2FA for the client, let's generate a client-specific secret server-side:
 
 ```
 const secret = generateSecret(16);  // <- 16 bytes for the secret
@@ -32,8 +34,7 @@ sendSecretToClient(secret);
 saveSecretToDB(secret);
 ```
 
-The client puts this secret into their TOTP passcode generator.
-Then, at some later point when the client accesses some protected resource, we need to verify the passcode they send:
+The client puts this secret into their TOTP passcode generator. Then, at some later point when the client requests access to some protected resource, we need to verify the passcode they send:
 ```
 const secret = getFromDB();
 const candidatePasscode = getFromClientRequest();
@@ -85,7 +86,9 @@ NB: All times passed into the TOTP functions should be numbers expressed in mill
 Used to generate/verify a HOTP passcode.
 
 `secret`, `options` - See above
+
 `counter` - A non-negative integer used to generate the passcode. It should be incremented on each request.
+
 `candidate` - A string containing the candidate passcode to be verified.
 
 ### generateTOTP(secret, time, options)
@@ -94,7 +97,9 @@ Used to generate/verify a HOTP passcode.
 Used to generate/verify a TOTP passcode.
 
 `secret`, `options` - See above
+
 `time` - The current time, expressed in milliseconds. (i.e. Unix time, except milliseconds are used rather than seconds)
+
 `candidate` - A string containing the candidate passcode to be verified.
 
 ### generateSecret(numBytes, encoding)
@@ -102,6 +107,7 @@ Used to generate/verify a TOTP passcode.
 Used to generate a cryptographically strong pseudo-random secret. Returns an encoded string.
 
 `numBytes` - the number of bytes used to generate the secret
+
 `encoding` - this is the encoding used to encode the secret. Can be one of 'base32', 'urlsafe-base64', 'base64', or 'hex'.
 
 ## TODO
