@@ -7,7 +7,8 @@ const DEFAULTS = {
     codeLength: 6,
     hashFunction: 'sha1',
     startTime: 0,
-    timeStep: 30000
+    timeStep: 30000,
+    verifyWithOneTimeStep: false
 };
 // according to the spec HOTP uses SHA1, whilst TOTP can also use 
 // SHA256 and SHA512. The HOTP restriction that it use SHA1 is 
@@ -159,10 +160,14 @@ function verifyTOTP(candidate, secret, time, options) {
         throw new Error('time should be a safe, positive integer.');
     }
 
-    const { encoding, startTime, timeStep, hashFunction, codeLength } = { ...DEFAULTS, ...options };
+    const { encoding, startTime, timeStep, hashFunction, codeLength, verifyWithOneTimeStep } = { ...DEFAULTS, ...options };
 
     const secretBuffer = _decodeSecret(secret, encoding);
     const timeCounter = Math.floor((time - startTime) / timeStep);
+
+    if (verifyWithOneTimeStep) {
+        return candidate === _generateOTP(secretBuffer, timeCounter, hashFunction, codeLength);
+    }
 
     // due to the possibility of the server clock and client clock being out of
     // sync, it's standard to accept codes that are +/- one timeStep (effectively

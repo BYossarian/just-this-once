@@ -37,7 +37,7 @@ const TOTP_TEST_DATA = {
         { TIME_IN_SECS: 20000000000, CODE: '77737706', HASH_FUNCTION: 'sha256' },
         { TIME_IN_SECS: 20000000000, CODE: '47863826', HASH_FUNCTION: 'sha512' }
     ],
-    INCORRECT_DATA: [
+    INCORRECT_PASSCODES_DATA: [
         { TIME_IN_SECS: 59, CODE: '', HASH_FUNCTION: 'sha1' },
         { TIME_IN_SECS: 59, CODE: '', HASH_FUNCTION: 'sha256' },
         { TIME_IN_SECS: 59, CODE: '', HASH_FUNCTION: 'sha512' },
@@ -59,6 +59,12 @@ const TOTP_TEST_DATA = {
     ]
 };
 // additional test data:
+const TOTP_TIMESTEP_DATA = {
+    SECRET: Buffer.from('31323334353637f83930313233e4353637383930', 'hex'),
+    CODE: '358636',
+    TIME_IN_MILLISECS: 59000,
+    TIMESTEP_IN_MILLISECS: 30000
+};
 const ENCODINGS_TEST_DATA = {
     SECRETS: {
         buffer: Buffer.from('31323334353637f83930313233e4353637383930', 'hex'),
@@ -269,7 +275,7 @@ describe('verifyTOTP', function() {
 
         });
 
-        TOTP_TEST_DATA.INCORRECT_DATA.forEach((incorrectData) => {
+        TOTP_TEST_DATA.INCORRECT_PASSCODES_DATA.forEach((incorrectData) => {
 
             expect(verifyTOTP(incorrectData.CODE, TOTP_TEST_DATA.SECRETS[incorrectData.HASH_FUNCTION], incorrectData.TIME_IN_SECS * 1000, {
                 hashFunction: incorrectData.HASH_FUNCTION,
@@ -277,6 +283,29 @@ describe('verifyTOTP', function() {
             })).to.equal(false);
 
         });
+
+    });
+
+    it('optionally, allows for some leeway in the time interval used to verify', function() {
+
+        const { CODE, SECRET, TIME_IN_MILLISECS, TIMESTEP_IN_MILLISECS } = TOTP_TIMESTEP_DATA;
+
+        expect(verifyTOTP(CODE, SECRET, TIME_IN_MILLISECS, { timeStep: TIMESTEP_IN_MILLISECS })).to.equal(true);
+
+        expect(verifyTOTP(CODE, SECRET, TIME_IN_MILLISECS + TIMESTEP_IN_MILLISECS, { timeStep: TIMESTEP_IN_MILLISECS })).to.equal(true);
+
+        expect(verifyTOTP(CODE, SECRET, TIME_IN_MILLISECS - TIMESTEP_IN_MILLISECS, { timeStep: TIMESTEP_IN_MILLISECS })).to.equal(true);
+
+        // if we now turn the option off, the codes should be rejected:
+        expect(verifyTOTP(CODE, SECRET, TIME_IN_MILLISECS + TIMESTEP_IN_MILLISECS, {
+            timeStep: TIMESTEP_IN_MILLISECS, 
+            verifyWithOneTimeStep: true
+        })).to.equal(false);
+
+        expect(verifyTOTP(CODE, SECRET, TIME_IN_MILLISECS + TIMESTEP_IN_MILLISECS, {
+            timeStep: TIMESTEP_IN_MILLISECS, 
+            verifyWithOneTimeStep: true
+        })).to.equal(false);
 
     });
 

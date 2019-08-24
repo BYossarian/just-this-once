@@ -65,7 +65,8 @@ NB: All times passed into the TOTP functions should be numbers expressed in mill
     // these are only used for TOTP:
     hashFunction: <string - one of 'sha1', 'sha256', 'sha512'; default: 'sha1'>,
     startTime: <positive integer; default: 0>,
-    timeStep: <positive integer; default: 30000>
+    timeStep: <positive integer; default: 30000>,
+    verifyWithOneTimeStep: <boolean; default: false>
 }
 ```
 
@@ -78,6 +79,8 @@ NB: All times passed into the TOTP functions should be numbers expressed in mill
 `startTime` - this is the start time in milliseconds used in TOTP in order to calculate the time-based counter
 
 `timeStep` - this is the time-step in milliseconds used in TOTP in order to calculate the time-based counter
+
+`verifyWithOneTimeStep` - due to the possibility that the clocks between the client and the server are slightly out of sync (and also due to the non-zero amount of time required to transmit the candidate passcode from the client to the server), it's common for implementations to give a leeway of +1/-1 time-step when verifying the TOTP code. This implementation also defaults to verifying using +1/-1 time-step, but that behaviour can be used off by setting `verifyWithOneTimeStep` to `true`
 
 ### generateHOTP(secret, counter, options)
 ### verifyHOTP(candidate, secret, counter, options)
@@ -109,5 +112,4 @@ Used to generate a cryptographically strong pseudo-random secret. Returns an enc
 - Use ArrayBuffer in place of Buffer so that this can be used outside of Node. For crypto functions:
 https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest
 https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
-- Allow specification of 'time-step leeway' in verifyTOTP. Maybe just a boolean for strict/non-strict (non-strict === +1/-1 timestep)
 - Use TypeScript to do input validation
