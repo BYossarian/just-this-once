@@ -27,15 +27,15 @@ Let's consider using just-this-once on the server to allow two-factor auth via a
 
 Ok, to enable 2FA for the client, let's generate a client-specific secret server-side:
 
-```
-const secret = generateSecret(16);  // <- 16 bytes for the secret
+```javascript
+const secret = generateSecret(16);  // 16 bytes for the secret; returns base32-encoded string
 
 sendSecretToClient(secret);
 saveSecretToDB(secret);
 ```
 
 The client puts this secret into their TOTP passcode generator. Then, at some later point when the client requests access to some protected resource, we need to verify the passcode they send:
-```
+```javascript
 const secret = getFromDB();
 const candidatePasscode = getFromClientRequest();
 
